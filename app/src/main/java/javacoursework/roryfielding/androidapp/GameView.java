@@ -91,10 +91,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
+
+
         //set up background and player
         background = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.background)); //set the background to resource
         player = new Player(BitmapFactory.decodeResource(getResources(), R.drawable.flappydragonresized), 122, 88, 6);   //get image, width of frame, height of frame, num of frames
-       //set up array lists and missile timer
+       //set up missile timer and arrays
         missiles = new ArrayList<Missile>();
         topBorders = new ArrayList<TopBorder>();
         bottomBorders = new ArrayList<BottomBorder>();
@@ -152,7 +154,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
             //calculate the threshold of height the border can have based on the score
             //max and min border height are updated, and the border switches direction when either max or min is met
-            maxBorderHeight = 60 + player.getScore() / progressDenominator;
+            maxBorderHeight = 30 + player.getScore() / progressDenominator;
             //cap max border height so that borders can only take up a total of half screen otherwise it's impossible
             if (maxBorderHeight > HEIGHT / 4) {
                 maxBorderHeight = HEIGHT / 4;
@@ -187,17 +189,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
                     //first missile always goes down center of screen, starting offset by 10 on x axis so starts off screen
                     if (missiles.size() == 0) {
-                        missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.missile),
-                                WIDTH + 10, HEIGHT / 2, 45, 15, player.getScore(), 13));
+                        missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.flysprite),
+                                WIDTH + 10, HEIGHT / 2, 57, 46, player.getScore(), 2));
                     } else { //other missiles are randomly placed on the screen however do no intersect with the borders created
-                        missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.missile),
-                                WIDTH + 10, (int) (rng.nextDouble() * (HEIGHT - (maxBorderHeight * 2)) + maxBorderHeight + 15), 45, 15, player.getScore(), 13));
+                        missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.flysprite),
+                                WIDTH + 10, (int) (rng.nextDouble() * (HEIGHT - (maxBorderHeight * 2)) + maxBorderHeight + 15), 57, 46, player.getScore(), 2));
                     }
                     if(player.getScore() > 300){ //once players hits level 3, start firing even more missiles
-                        missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.missile),
-                                WIDTH + 10, (int) (rng.nextDouble() * (HEIGHT - (maxBorderHeight * 2)) + maxBorderHeight + 15), 45, 15, player.getScore(), 13));
-                        missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.missile),
-                                WIDTH + 10, (int) (rng.nextDouble() * (HEIGHT - (maxBorderHeight * 2)) + maxBorderHeight + 15), 45, 15, player.getScore(), 13));
+                        missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.flysprite),
+                                WIDTH + 10, (int) (rng.nextDouble() * (HEIGHT - (maxBorderHeight * 2)) + maxBorderHeight + 15), 57, 46, player.getScore(), 2));
+                        missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.flysprite),
+                                WIDTH + 10, (int) (rng.nextDouble() * (HEIGHT - (maxBorderHeight * 2)) + maxBorderHeight + 15), 57, 46, player.getScore(), 2));
 
                     }
                     missileStartTime = System.nanoTime();
@@ -309,7 +311,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         //borders will go up until they reach max height, then go down till min, then reiterate
         //every 50 points, insert randomly placed top blocks that break that pattern
         if (player.getScore() % 50 == 0) {
-            topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.bricks
+            topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall
             ), topBorders.get(topBorders.size() - 1).getX() + 20, 0, (int) ((rng.nextDouble() * (maxBorderHeight
             )) + 1)));
             //height will be random number from 1 to the max border height
@@ -328,12 +330,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 //new border added will have more height
                 if(topDown){
                     topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(),
-                            R.drawable.bricks), topBorders.get(topBorders.size()-1).getX() + 20,
+                            R.drawable.stonewall), topBorders.get(topBorders.size()-1).getX() + 20,
                             0, topBorders.get(topBorders.size()-1).getHeight() + 1));
                 }else //new border added will have less height
                     {
                         topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(),
-                                R.drawable.bricks), topBorders.get(topBorders.size()-1).getX() + 20,
+                                R.drawable.stonewall), topBorders.get(topBorders.size()-1).getX() + 20,
                                 0, topBorders.get(topBorders.size()-1).getHeight() - 1));
 
                 }
@@ -345,7 +347,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
         //every 60 points, insert randomly placed bottom blocks that break pattern
         if (player.getScore() % 60 == 0) {
-            bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource((getResources()), R.drawable.bricks),
+            bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource((getResources()), R.drawable.stonewall),
                     bottomBorders.get(bottomBorders.size() - 1).getX() + 20, (int) ((rng.nextDouble() * maxBorderHeight
                     + (HEIGHT - maxBorderHeight)))));
         }
@@ -367,11 +369,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     }
 
                     if (bottomDown) {
-                        bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.bricks)
+                        bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall)
                                 , bottomBorders.get(bottomBorders.size() - 1).getX() + 20, bottomBorders.get(bottomBorders.size() - 1
                         ).getY() + 1)); //move down
                     } else {
-                        bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.bricks)
+                        bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall)
                                 , bottomBorders.get(bottomBorders.size() - 1).getX() + 20, bottomBorders.get(bottomBorders.size() - 1
                         ).getY() - 1)); //move up
                     }
@@ -389,7 +391,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         topBorders.clear();
         missiles.clear();
         minBorderHeight = 5; //reset variables
-        maxBorderHeight = 60;
+        maxBorderHeight = 30;
         player.setY(HEIGHT/2);
         player.resetDY();
 
@@ -419,11 +421,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         //create initial borders until they are width +40 off the screen
         for(int i = 0; i * 20 < WIDTH + 40; i++){
             if(i == 0){ //first one created
-                topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.bricks
+                topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall
                 ), i * 20, 0, 10));
             }else
                 {
-                    topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.bricks
+                    topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall
                     ), i * 20, 0, topBorders.get(i-1).getHeight()+1)); //add to last element in array
                 }
         }
@@ -432,10 +434,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         for(int i = 0; i * 20 < WIDTH + 40; i++){
             //first one created
             if(i == 0){
-                bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.bricks
+                bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall
                 ), i*20, HEIGHT - minBorderHeight ));
             } else { //adding on top of this until full screen
-                bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.bricks)
+                bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall)
                 , i*20, bottomBorders.get(i-1).getY()-1));
             }
 
@@ -529,6 +531,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             }
 
             player.resetScore();
+
+           // ((Activity) getContext()).finish();
 
             Intent intent = new Intent().setClass(getContext(), HighscoreActivity.class);
             ((Activity) getContext()).startActivity(intent);
