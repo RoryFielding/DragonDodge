@@ -14,12 +14,19 @@ public class Animation {
     private long delay;
     private boolean playedOnce;
 
-
-    Animation(){
+    /**
+     * Constructor for the Animation class
+     */
+    Animation() {
 
     }
 
-    public void setFrames(Bitmap [] frames){
+    /**
+     * Set the frames for the animation to run
+     *
+     * @param frames frame to set
+     */
+    public void setFrames(Bitmap[] frames) {
 
         this.frames = frames;
         currentFrame = 0;
@@ -27,39 +34,67 @@ public class Animation {
 
     }
 
-    public void setDelay(long d){
+    /**
+     * Set the delay for the animation to run
+     *
+     * @param d delay time
+     */
+    public void setDelay(long d) {
         delay = d;
     }
 
-    public void setFrame(int f){
+    /**
+     * Set the frame to the frame given in the parameter
+     *
+     * @param f frame number
+     */
+    public void setFrame(int f) {
         currentFrame = f;
     }
 
-    public void update(){
+    /**
+     * Update the animation
+     */
+    public void update() {
 
-        long elapsed = (System.nanoTime() - startTime)/1000000;
+        long elapsed = (System.nanoTime() - startTime) / 1000000;
 
-        if (elapsed > delay){ //determine which image in array to return
+        if (elapsed > delay) { //determine which image in array to return
             currentFrame++;
             startTime = System.nanoTime();
         }
 
-        if(currentFrame == frames.length){
+        if (currentFrame == frames.length) {
             currentFrame = 0;
             playedOnce = true;
         }
     }
 
-    public Bitmap getImage(){
+    /**
+     * Function to determine what the player class draws
+     *
+     * @return frame array with current frame
+     */
+    public Bitmap getImage() {
         //what player class draws is determined by this method
         return frames[currentFrame];
     }
 
-    public int getFrame(){
+    /**
+     * Getter for current frame
+     *
+     * @return currentFrame
+     */
+    public int getFrame() {
         return currentFrame;
     }
 
-    public boolean playedOnce(){
+    /**
+     * Function to determine whether the animation has played once
+     *
+     * @return playedOnce if animation has played
+     */
+    public boolean playedOnce() {
         return playedOnce;
     }
 

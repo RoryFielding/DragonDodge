@@ -15,6 +15,13 @@ public class TheGame extends Activity {
 
     MediaPlayer mediaPlayer;
 
+    /**
+     * Override onCreate function to set layout to menu on start up
+     * Start music
+     * Implemented buttons to take user to game, settings menu and highscores
+     *
+     * @param savedInstanceState Bundle
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +64,7 @@ public class TheGame extends Activity {
             @Override
             public void onClick(View view) {
                 finish();
-                 launchHighscores();
+                launchHighscores();
             }
         });
 
@@ -72,32 +79,56 @@ public class TheGame extends Activity {
 
     }
 
+    /**
+     * Override function for menu
+     *
+     * @param item MenuItem
+     * @return super
+     */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
+    public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Override function for menu
+     *
+     * @param menu Menu
+     * @return true
+     */
     @Override
-    public boolean onCreateOptionsMenu (Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_game, menu);
         return true;
     }
 
-    public void launchSettings(){
+    /**
+     * Function to launch the game
+     */
+    public void launchSettings() {
         startActivity(new Intent(TheGame.this, SettingsActivity.class));
     }
 
-    public void launchHighscores(){
+    /**
+     * Function to launch the highscore activity
+     */
+    public void launchHighscores() {
         startActivity(new Intent(TheGame.this, HighscoreActivity.class));
     }
 
-    public void launchModeChanger(){
+    /**
+     * Function to launch the settings to allow user to change difficulty
+     */
+    public void launchModeChanger() {
         startActivity(new Intent(TheGame.this, ModeChanger.class));
     }
 
+    /**
+     * Override onPause to stop media player
+     */
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         mediaPlayer.release();
         finish();

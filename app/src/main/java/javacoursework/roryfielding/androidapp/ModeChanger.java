@@ -19,6 +19,13 @@ public class ModeChanger extends Activity {
     Button hardBtn;
     Button goBackBtn;
 
+    /**
+     * Override onCreate function to set layout to the settings
+     * Buttons allow player to choose difficulty of the game
+     * Easy, Medium or Hard alters to progress denominator value for the game.
+     *
+     * @param savedInstanceState Bundle
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +73,10 @@ public class ModeChanger extends Activity {
 
     }
 
-    public void launchMainActivity(){
+    /**
+     * Function to send the player back to the main activity
+     */
+    public void launchMainActivity() {
         Intent mainIntent = new Intent(this, TheGame.class);
         startActivity(mainIntent);
     }

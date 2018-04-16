@@ -15,6 +15,7 @@ import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -25,6 +26,7 @@ import java.util.Random;
 public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     private MainThread mainThread;
+    private SecondaryThread secondThread;
     private Background background;
     private Player player;
     private Explosion explosion;
@@ -49,6 +51,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private boolean started;
     private MediaPlayer explosionsound;
 
+    /**
+     * Constructor for the gameview
+     *
+     * @param context Context
+     */
     public GameView(Context context) {
 
 
@@ -63,11 +70,23 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         this.loseGame = false;
     }
 
+    /**
+     * Override surfaceChanged function
+     *
+     * @param holder Surfaceholder
+     * @param format format
+     * @param width  width
+     * @param height height
+     */
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
     }
 
+    /**
+     * Override surfaceDestroyed function
+     * Ensure main & second thread set to stop running when surface destroyed
+     */
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 
@@ -78,8 +97,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             try {
                 mainThread.setRunning(false); //try to stop thread and set running to false
                 mainThread.join();
+                //   secondThread.setRunning(false);
+                //   secondThread.join();
                 retry = false; //if succeed goes to retry = false stopping thread.
                 mainThread = null; //set thread to null so garbage collector gets object
+                //   secondThread = null;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } //if this false, catch and retry again
@@ -87,20 +109,39 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
     }
+/*
+    public void secondaryThreadCalls(){
+        //set up missile timer and arrays
+        missiles = new ArrayList<Missile>();
+        topBorders = new ArrayList<TopBorder>();
+        bottomBorders = new ArrayList<BottomBorder>();
+        missileStartTime = System.nanoTime();
 
+        secondThread = new SecondaryThread(getHolder(), this);
+        secondThread.setRunning(true);
+        secondThread.start();
+    }
+    */
+
+    /**
+     * Override surfaceCreated, set up arraylists, background and player
+     * Instantiate main thread and call secondary thread
+     *
+     * @param holder Surfaceholder
+     */
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-
 
 
         //set up background and player
         background = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.background)); //set the background to resource
         player = new Player(BitmapFactory.decodeResource(getResources(), R.drawable.flappydragonresized), 122, 88, 6);   //get image, width of frame, height of frame, num of frames
-       //set up missile timer and arrays
+        //set up missile timer and arrays
         missiles = new ArrayList<Missile>();
         topBorders = new ArrayList<TopBorder>();
         bottomBorders = new ArrayList<BottomBorder>();
         missileStartTime = System.nanoTime();
+
 
         //instantiate thread
         mainThread = new MainThread(getHolder(), this);
@@ -109,8 +150,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         mainThread.setRunning(true);
         mainThread.start();
 
+        // secondaryThreadCalls();
+
     }
 
+    /**
+     * Override onTouchEvent so that if the first time pressing down, the game begins
+     * If the second time pressing down, control height of player going up
+     * If releasing touch, allow player to move down on the y axis
+     *
+     * @param event MotionEvent
+     * @return
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
@@ -119,8 +170,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 player.setPlaying(true); //starting playing
                 player.setUp(true);
             }
-            if(player.getPlaying()){
-                if(!started) started = true;
+            if (player.getPlaying()) {
+                if (!started) started = true;
                 reset = false;
                 player.setUp(true);
             }
@@ -136,15 +187,24 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         return super.onTouchEvent(event);
     }
 
+    /**
+     * Update function in order to run the game.
+     * Only update if the player is playing, update background and player
+     * Calculate the threshold of height the border can have based on the score
+     * max and min border height are updated, and the border switches direction when either max or min is met
+     * borders are then updated
+     * Once the player reaches level 2 and level 3, add mechanics to launch enemies at the player.
+     * When the player dies, reset the game.
+     */
     public void update() {
 
         if (player.getPlaying()) { //only update if playing
 
-            if(bottomBorders.isEmpty()){
+            if (bottomBorders.isEmpty()) {
                 player.setPlaying(false);
                 return;
             }
-            if(topBorders.isEmpty()){
+            if (topBorders.isEmpty()) {
                 player.setPlaying(false);
                 return;
             }
@@ -163,14 +223,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             minBorderHeight = 5 + player.getScore() / progressDenominator;
 
             //check top border collision
-            for(int i = 0; i<topBorders.size(); i++){
-                if(collision(topBorders.get(i), player))
+            for (int i = 0; i < topBorders.size(); i++) {
+                if (collision(topBorders.get(i), player))
                     player.setPlaying(false);
             }
 
             //check bottom border collision
-            for(int i = 0; i <bottomBorders.size(); i++){
-                if(collision(bottomBorders.get(i), player))
+            for (int i = 0; i < bottomBorders.size(); i++) {
+                if (collision(bottomBorders.get(i), player))
                     player.setPlaying(false);
             }
 
@@ -195,7 +255,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                         missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.flysprite),
                                 WIDTH + 10, (int) (rng.nextDouble() * (HEIGHT - (maxBorderHeight * 2)) + maxBorderHeight + 15), 57, 46, player.getScore(), 2));
                     }
-                    if(player.getScore() > 300){ //once players hits level 3, start firing even more missiles
+                    if (player.getScore() > 300) { //once players hits level 3, start firing even more missiles
                         missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.flysprite),
                                 WIDTH + 10, (int) (rng.nextDouble() * (HEIGHT - (maxBorderHeight * 2)) + maxBorderHeight + 15), 57, 46, player.getScore(), 2));
                         missiles.add(new Missile(BitmapFactory.decodeResource(getResources(), R.drawable.flysprite),
@@ -216,37 +276,44 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                         break;
                     }
                     if (missiles.get(i).getX() < -100) { //if player dodges missile and it is off screen
-                        missiles.remove(i); //remove the missile in order to save memory
+                        //     missiles.remove(i); //remove the missile in order to save memory
                     }
                 }
             }
-        }else //when the player dies
-            {
-                player.resetDY();
-                if(!reset){
-                    newGameCreated = false;
-                    startReset = System.nanoTime();
-                    reset = true;
-                    disappear = true;
-                    explosion = new Explosion(BitmapFactory.decodeResource(getResources(), R.drawable.explosion),
-                            player.getX(), player.getY() - 30, 100, 100, 25); //draw explosion slightly above player
-                    explosionsound = MediaPlayer.create(getContext(), R.raw.explosion);
-                    explosionsound.start();
-                }
-                explosion.update();;
-                long resetElapsed = (System.nanoTime() - startReset)/1000000;
+        } else //when the player dies
+        {
+            player.resetDY();
+            if (!reset) {
+                newGameCreated = false;
+                startReset = System.nanoTime();
+                reset = true;
+                disappear = true;
+                explosion = new Explosion(BitmapFactory.decodeResource(getResources(), R.drawable.explosion),
+                        player.getX(), player.getY() - 30, 100, 100, 25); //draw explosion slightly above player
+                explosionsound = MediaPlayer.create(getContext(), R.raw.explosion);
+                explosionsound.start();
+            }
+            explosion.update();
+            ;
+            long resetElapsed = (System.nanoTime() - startReset) / 1000000;
 
-                if(resetElapsed > 1500 && !newGameCreated){
-                   newGame();
-                }
+            if (resetElapsed > 1500 && !newGameCreated) {
+                newGame();
+            }
 
-                if(resetElapsed > 1 && loseGame){
-                    gameLost();
-                }
+            if (resetElapsed > 1 && loseGame) {
+                gameLost();
+            }
         }
     }
 
-    //function to tell whether two game objects are colliding
+    /**
+     * Function to tell whether two game objects are colliding
+     *
+     * @param a Gameobject a
+     * @param b Gameobject b
+     * @return true if collision
+     */
     public boolean collision(GameObject a, GameObject b) {
         if (Rect.intersects(a.getRectangle(), b.getRectangle())) {
             loseGame = true;
@@ -256,6 +323,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    /**
+     * Override the draw function of the game
+     * Ensure scaling is appropriate for size of screen
+     * Draw background
+     * Draw player
+     * Draw missiles
+     * Draw borders
+     * Draw explosion if collision occurs
+     * Draw levels to screen when set score has been reached
+     *
+     * @param canvas Canvas
+     */
     @Override
     public void draw(Canvas canvas) {
 
@@ -267,7 +346,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             canvas.scale(scaleFactorX, scaleFactorY); //scale
             background.draw(canvas); //draw background
 
-            if(!disappear) {
+            if (!disappear) {
                 player.draw(canvas);
             }
 
@@ -276,17 +355,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             }
 
             //draw topborder
-            for(TopBorder tb : topBorders){
+            for (TopBorder tb : topBorders) {
                 tb.draw(canvas);
             }
 
             //draw bottomborder
-            for(BottomBorder bb: bottomBorders){
+            for (BottomBorder bb : bottomBorders) {
                 bb.draw(canvas);
             }
 
             //draw explosion
-            if(started){
+            if (started) {
                 explosion.draw(canvas);
             }
 
@@ -297,8 +376,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             paint2.setTextSize(50);
             paint2.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
 
-            for (int i = 1; i < 100; i++){
-                if(player.getPlaying() && (player.getScore() > (i * 100)) && (player.getScore() < ((i * 100) + 20))){
+            for (int i = 1; i < 100; i++) {
+                if (player.getPlaying() && (player.getScore() > (i * 100)) && (player.getScore() < ((i * 100) + 20))) {
                     canvas.drawText("Level " + i, WIDTH / 2 - 50, HEIGHT / 2, paint2);
                 }
             }
@@ -307,6 +386,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    /**
+     * Update the top border of the game walls
+     * Border will increase until they reach maximum variable height, then decrease down till the minimum
+     * Every 50 points, randomly insert blocks to break the pattern for new gameplay
+     * Remove borders once they have moved off the screen
+     */
     public void updateTopBorder() {
         //borders will go up until they reach max height, then go down till min, then reiterate
         //every 50 points, insert randomly placed top blocks that break that pattern
@@ -317,32 +402,38 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             //height will be random number from 1 to the max border height
         }
 
-        for (int i = 0; i < topBorders.size(); i++){
+        for (int i = 0; i < topBorders.size(); i++) {
             topBorders.get(i).update();
-            if(topBorders.get(i).getX() < - 20){ //if border moves off the map by -20
+            if (topBorders.get(i).getX() < -20) { //if border moves off the map by -20
                 topBorders.remove(i); //remove this object from the arraylist to save memory
-                if(topBorders.get(topBorders.size()-1).getHeight() >= maxBorderHeight){ //calculate topdown which determines which
+                if (topBorders.get(topBorders.size() - 1).getHeight() >= maxBorderHeight) { //calculate topdown which determines which
                     topDown = false; //direction border is moving (up or down)
                 }
-                if(topBorders.get(topBorders.size()-1).getHeight() <= minBorderHeight){ //if last element smaller than minheight
+                if (topBorders.get(topBorders.size() - 1).getHeight() <= minBorderHeight) { //if last element smaller than minheight
                     topDown = true; //switch direction
                 }
                 //new border added will have more height
-                if(topDown){
+                if (topDown) {
                     topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(),
-                            R.drawable.stonewall), topBorders.get(topBorders.size()-1).getX() + 20,
-                            0, topBorders.get(topBorders.size()-1).getHeight() + 1));
-                }else //new border added will have less height
-                    {
-                        topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(),
-                                R.drawable.stonewall), topBorders.get(topBorders.size()-1).getX() + 20,
-                                0, topBorders.get(topBorders.size()-1).getHeight() - 1));
+                            R.drawable.stonewall), topBorders.get(topBorders.size() - 1).getX() + 20,
+                            0, topBorders.get(topBorders.size() - 1).getHeight() + 1));
+                } else //new border added will have less height
+                {
+                    topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(),
+                            R.drawable.stonewall), topBorders.get(topBorders.size() - 1).getX() + 20,
+                            0, topBorders.get(topBorders.size() - 1).getHeight() - 1));
 
                 }
             }
         }
     }
 
+    /**
+     * Update the top bottom of the game walls
+     * Border will increase until they reach maximum variable height, then decrease down till the minimum
+     * Every 60 points, randomly insert blocks to break the pattern for new gameplay
+     * Remove borders once they have moved off the screen
+     */
     public void updateBottomBorder() {
 
         //every 60 points, insert randomly placed bottom blocks that break pattern
@@ -351,38 +442,44 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     bottomBorders.get(bottomBorders.size() - 1).getX() + 20, (int) ((rng.nextDouble() * maxBorderHeight
                     + (HEIGHT - maxBorderHeight)))));
         }
-            //update bottom border
-            for (int i = 0; i < bottomBorders.size(); i++){
-                bottomBorders.get(i).update();
+        //update bottom border
+        for (int i = 0; i < bottomBorders.size(); i++) {
+            bottomBorders.get(i).update();
 
-                //if border is moving off screen, remove it and add a corresponding new one of the other size
+            //if border is moving off screen, remove it and add a corresponding new one of the other size
 
-                if(bottomBorders.get(i).getX() < - 20) {
-                    bottomBorders.remove(i);
+            if (bottomBorders.get(i).getX() < -20) {
+                bottomBorders.remove(i);
 
-                    //determine if border going up or down
-                    if (bottomBorders.get(bottomBorders.size() - 1).getY() <= HEIGHT - maxBorderHeight) { //calculate topdown which determines which
-                        bottomDown = true; //direction border is moving (up or down)
-                    }
-                    if (bottomBorders.get(bottomBorders.size() - 1).getY() >= HEIGHT - minBorderHeight) { //if last element smaller than minheight
-                        bottomDown = false; //switch direction
-                    }
+                //determine if border going up or down
+                if (bottomBorders.get(bottomBorders.size() - 1).getY() <= HEIGHT - maxBorderHeight) { //calculate topdown which determines which
+                    bottomDown = true; //direction border is moving (up or down)
+                }
+                if (bottomBorders.get(bottomBorders.size() - 1).getY() >= HEIGHT - minBorderHeight) { //if last element smaller than minheight
+                    bottomDown = false; //switch direction
+                }
 
-                    if (bottomDown) {
-                        bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall)
-                                , bottomBorders.get(bottomBorders.size() - 1).getX() + 20, bottomBorders.get(bottomBorders.size() - 1
-                        ).getY() + 1)); //move down
-                    } else {
-                        bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall)
-                                , bottomBorders.get(bottomBorders.size() - 1).getX() + 20, bottomBorders.get(bottomBorders.size() - 1
-                        ).getY() - 1)); //move up
-                    }
+                if (bottomDown) {
+                    bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall)
+                            , bottomBorders.get(bottomBorders.size() - 1).getX() + 20, bottomBorders.get(bottomBorders.size() - 1
+                    ).getY() + 1)); //move down
+                } else {
+                    bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall)
+                            , bottomBorders.get(bottomBorders.size() - 1).getX() + 20, bottomBorders.get(bottomBorders.size() - 1
+                    ).getY() - 1)); //move up
                 }
             }
         }
+    }
 
-
-    public void newGame(){
+    /**
+     * The newGame function is called in order to start a new game
+     * This is called both when the player dies and when a new game is started
+     * Arrays are cleared and variables reset
+     * The highscores are updated based on the player's last score
+     * The borders are then initialised
+     */
+    public void newGame() {
 
         //new game gets called 1500ms after player dies
 
@@ -392,11 +489,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         missiles.clear();
         minBorderHeight = 5; //reset variables
         maxBorderHeight = 30;
-        player.setY(HEIGHT/2);
+        player.setY(HEIGHT / 2);
         player.resetDY();
 
         //if top score, bump other scores down and set top to first
-        if((player.getScore() > (getRecord())) && (player.getScore() > getRecord2()) && (player.getScore() > getRecord3())){
+        if ((player.getScore() > (getRecord())) && (player.getScore() > getRecord2()) && (player.getScore() > getRecord3())) {
             setRecord3(getRecord2());
             setRecord2(getRecord());
             setRecord(player.getScore());
@@ -404,14 +501,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         //if second score, greater than three and two but less than one bump second score to third and set second
-        if((player.getScore() > getRecord2()) && (player.getScore() > getRecord3()) && (player.getScore() < getRecord())){
+        if ((player.getScore() > getRecord2()) && (player.getScore() > getRecord3()) && (player.getScore() < getRecord())) {
             setRecord3(getRecord2());
             setRecord2(player.getScore());
             player.resetScore();
         }
 
         //if third score but not greater than the second score, set third score
-        if((player.getScore() > getRecord3()) && player.getScore() < getRecord2()){
+        if ((player.getScore() > getRecord3()) && player.getScore() < getRecord2()) {
             setRecord3(player.getScore());
             player.resetScore();
         }
@@ -419,26 +516,25 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         player.resetScore();
 
         //create initial borders until they are width +40 off the screen
-        for(int i = 0; i * 20 < WIDTH + 40; i++){
-            if(i == 0){ //first one created
+        for (int i = 0; i * 20 < WIDTH + 40; i++) {
+            if (i == 0) { //first one created
                 topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall
                 ), i * 20, 0, 10));
-            }else
-                {
-                    topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall
-                    ), i * 20, 0, topBorders.get(i-1).getHeight()+1)); //add to last element in array
-                }
+            } else {
+                topBorders.add(new TopBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall
+                ), i * 20, 0, topBorders.get(i - 1).getHeight() + 1)); //add to last element in array
+            }
         }
 
         //initialise bottom borders
-        for(int i = 0; i * 20 < WIDTH + 40; i++){
+        for (int i = 0; i * 20 < WIDTH + 40; i++) {
             //first one created
-            if(i == 0){
+            if (i == 0) {
                 bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall
-                ), i*20, HEIGHT - minBorderHeight ));
+                ), i * 20, HEIGHT - minBorderHeight));
             } else { //adding on top of this until full screen
                 bottomBorders.add(new BottomBorder(BitmapFactory.decodeResource(getResources(), R.drawable.stonewall)
-                , i*20, bottomBorders.get(i-1).getY()-1));
+                        , i * 20, bottomBorders.get(i - 1).getY() - 1));
             }
 
             newGameCreated = true;
@@ -446,7 +542,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
-    public void drawText(Canvas canvas){
+    /**
+     * This function is used to display the greeting message to the player with instructions
+     * how to play the game on launch. Furthermore while the player is playing, the score and top
+     * highscore are displayed to the player at the bottom of the screen surrounded by a black border
+     *
+     * @param canvas Canvas
+     */
+    public void drawText(Canvas canvas) {
 
         Paint backcolour = new Paint();
         backcolour.setColor(Color.BLACK);
@@ -458,84 +561,118 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         canvas.drawText("SCORE: " + (player.getScore()), 10, HEIGHT - 10, paint);
         canvas.drawText("HIGHSCORE: " + getRecord(), WIDTH - 285, HEIGHT - 10, paint);
 
-        if(!player.getPlaying() && newGameCreated && reset){
+        if (!player.getPlaying() && newGameCreated && reset) {
             Paint paint1 = new Paint();
             paint1.setColor(Color.WHITE);
             paint1.setTextSize(80);
             paint1.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
-            canvas.drawText("PRESS TO START", WIDTH/2-50, HEIGHT/2, paint1);
+            canvas.drawText("PRESS TO START", WIDTH / 2 - 50, HEIGHT / 2, paint1);
 
             paint1.setTextSize(60);
-            canvas.drawText("TOUCH TO GO UP", WIDTH/2-50, HEIGHT/2 + 60, paint1);
-            canvas.drawText("RELEASE TO FALL", WIDTH/2-50, HEIGHT/2 + 120, paint1);
+            canvas.drawText("TOUCH TO GO UP", WIDTH / 2 - 50, HEIGHT / 2 + 60, paint1);
+            canvas.drawText("RELEASE TO FALL", WIDTH / 2 - 50, HEIGHT / 2 + 120, paint1);
         }
     }
 
-    public int getRecord(){
+    /**
+     * Get record
+     *
+     * @return first highscore
+     */
+    public int getRecord() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         return prefs.getInt("record", 0);
     }
 
-    public int getRecord2(){
+    /**
+     * Get second record
+     *
+     * @return second highscore
+     */
+    public int getRecord2() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         return prefs.getInt("second", 0);
     }
 
-    public int getRecord3(){
+    /**
+     * Get third record
+     *
+     * @return third highscore
+     */
+    public int getRecord3() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         return prefs.getInt("third", 0);
     }
 
-    public void setRecord(int value){
+    /**
+     * Set highscore
+     *
+     * @param value player score
+     */
+    public void setRecord(int value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt("record", value);
         editor.commit();
     }
 
-    public void setRecord2(int value){
+    /**
+     * Second second highscore
+     *
+     * @param value player score
+     */
+    public void setRecord2(int value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt("second", value);
         editor.commit();
     }
 
-    public void setRecord3(int value){
+    /**
+     * Set third highscore
+     *
+     * @param value player score
+     */
+    public void setRecord3(int value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt("third", value);
         editor.commit();
     }
 
-    public void gameLost(){
+    /**
+     * When the player loses the game, the high scores are set and the player is
+     * edirected to the highscore activity screen.
+     */
+    public void gameLost() {
 
-            //if top score, bump other scores down and set top to first
-            if((player.getScore() > (getRecord())) && (player.getScore() > getRecord2()) && (player.getScore() > getRecord3())){
-                setRecord3(getRecord2());
-                setRecord2(getRecord());
-                setRecord(player.getScore());
-                player.resetScore();
-            }
-
-            //if second score, greater than three and two but less than one bump second score to third and set second
-            if((player.getScore() > getRecord2()) && (player.getScore() > getRecord3()) && (player.getScore() < getRecord())){
-                setRecord3(getRecord2());
-                setRecord2(player.getScore());
-                player.resetScore();
-            }
-
-            //if third score but not greater than the second score, set third score
-            if((player.getScore() > getRecord3()) && player.getScore() < getRecord2()){
-                setRecord3(player.getScore());
-                player.resetScore();
-            }
-
+        //if top score, bump other scores down and set top to first
+        if ((player.getScore() > (getRecord())) && (player.getScore() > getRecord2()) && (player.getScore() > getRecord3())) {
+            setRecord3(getRecord2());
+            setRecord2(getRecord());
+            setRecord(player.getScore());
             player.resetScore();
-
-           // ((Activity) getContext()).finish();
-
-            Intent intent = new Intent().setClass(getContext(), HighscoreActivity.class);
-            ((Activity) getContext()).startActivity(intent);
         }
+
+        //if second score, greater than three and two but less than one bump second score to third and set second
+        if ((player.getScore() > getRecord2()) && (player.getScore() > getRecord3()) && (player.getScore() < getRecord())) {
+            setRecord3(getRecord2());
+            setRecord2(player.getScore());
+            player.resetScore();
+        }
+
+        //if third score but not greater than the second score, set third score
+        if ((player.getScore() > getRecord3()) && player.getScore() < getRecord2()) {
+            setRecord3(player.getScore());
+            player.resetScore();
+        }
+
+        player.resetScore();
+
+        // ((Activity) getContext()).finish();
+
+        Intent intent = new Intent().setClass(getContext(), HighscoreActivity.class);
+        ((Activity) getContext()).startActivity(intent);
+    }
 
 }

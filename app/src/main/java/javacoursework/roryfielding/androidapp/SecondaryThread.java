@@ -4,35 +4,33 @@ import android.graphics.Canvas;
 import android.view.SurfaceHolder;
 
 /**
- * Created by RoryFielding on 30/03/2018.
+ * Created by RoryFielding on 09/04/2018.
  */
 
-public class MainThread extends Thread {
+public class SecondaryThread extends Thread {
 
     private int FPS = 30;
     private double averageFPS;
     private SurfaceHolder surfaceHolder;
     private GameView gameView;
     private boolean running;
-    private static Canvas canvas;
+    public static Canvas canvas;
 
     /**
-     * Constructor for main thread
+     * Constructor for the secondary thread
      *
      * @param surfaceHolder SurfaceHolder
      * @param gameView      GameView
      */
-    MainThread(SurfaceHolder surfaceHolder, GameView gameView) {
+    SecondaryThread(SurfaceHolder surfaceHolder, GameView gameView) {
         super();
         this.surfaceHolder = surfaceHolder;
         this.gameView = gameView;
     }
 
     /**
-     * Run function to run the game
-     * Calculate FPS
-     * Update Game
-     * Draw Game
+     * Override run function for the thread
+     * Set FPS and draw/update game
      */
     @Override
     public void run() {
@@ -87,7 +85,6 @@ public class MainThread extends Thread {
                     averageFPS = 1000 / ((totalTime / frameCt) / 1000000); //calculate average fps
                     frameCt = 0;
                     totalTime = 0; //reset
-                    System.out.println(averageFPS); //each time framecount gets to 30, print out average fps to console
                 }
 
                 if (averageFPS > 30) {
@@ -99,11 +96,12 @@ public class MainThread extends Thread {
     }
 
     /**
-     * Function to set the game to running
+     * Set game running
      *
-     * @param b running boolean value
+     * @param b boolean running
      */
     public void setRunning(boolean b) {
         running = b;
     }
 }
+

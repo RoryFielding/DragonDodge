@@ -13,20 +13,30 @@ public class Explosion {
     private Animation animation = new Animation();
     private Bitmap spritesheet;
 
-    public Explosion(Bitmap resource, int x, int y, int w, int h, int numFrames){
+    /**
+     * Constructor for the Explosion class
+     *
+     * @param resource  bitmap
+     * @param x         x position
+     * @param y         y position
+     * @param w         width
+     * @param h         height
+     * @param numFrames number of frames
+     */
+    public Explosion(Bitmap resource, int x, int y, int w, int h, int numFrames) {
         this.x = x;
-        this.y= y;
+        this.y = y;
         this.width = w;
         this.height = h;
 
-        Bitmap [] image = new Bitmap[numFrames];
+        Bitmap[] image = new Bitmap[numFrames];
 
         spritesheet = resource;
 
-        for(int i = 0; i < image.length; i++){ //assign bitmap array to frames of explosion
-            if(i%5 == 0 & i > 0){
-                row ++;
-                image[i] = Bitmap.createBitmap(spritesheet, ( i - (5 * row)) * width, row * height, width, height);
+        for (int i = 0; i < image.length; i++) { //assign bitmap array to frames of explosion
+            if (i % 5 == 0 & i > 0) {
+                row++;
+                image[i] = Bitmap.createBitmap(spritesheet, (i - (5 * row)) * width, row * height, width, height);
             }
 
         }
@@ -35,20 +45,35 @@ public class Explosion {
 
     }
 
-    public void draw(Canvas canvas){
-        if(!animation.playedOnce()){ //only draw through once
-         canvas.drawBitmap(animation.getImage(), x, y, null);
+    /**
+     * Draw function for the explosion
+     * Only draw this once
+     *
+     * @param canvas Canvas
+     */
+    public void draw(Canvas canvas) {
+        if (!animation.playedOnce()) { //only draw through once
+            canvas.drawBitmap(animation.getImage(), x, y, null);
         }
 
     }
 
-    public void update(){
-        if(!animation.playedOnce()){ //only play the explosion one time
+    /**
+     * Update function for the explosion animation
+     * Only play the explosion one time
+     */
+    public void update() {
+        if (!animation.playedOnce()) { //only play the explosion one time
             animation.update();
         }
     }
 
-    public int getHeight(){
+    /**
+     * Getter for height
+     *
+     * @return height
+     */
+    public int getHeight() {
         return height;
     }
 

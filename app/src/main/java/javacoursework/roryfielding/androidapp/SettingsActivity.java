@@ -11,10 +11,16 @@ import android.widget.Button;
  * Created by RoryFielding on 05/04/2018.
  */
 
-public class SettingsActivity extends Activity{
+public class SettingsActivity extends Activity {
 
+    /**
+     * Override onCreate function to create instance of activity to run the game
+     * Set content view to game
+     *
+     * @param savedInstanceState Bundle
+     */
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 

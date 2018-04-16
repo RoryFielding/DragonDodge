@@ -9,28 +9,45 @@ import android.graphics.Canvas;
 
 public class TopBorder extends GameObject {
 
-    private Bitmap image;
-
-    public TopBorder(Bitmap resource, int x, int y, int h){
+    /**
+     * Constructor for the top border
+     *
+     * @param resource bitmap
+     * @param x        x position
+     * @param y        y position
+     * @param h        height
+     */
+    public TopBorder(Bitmap resource, int x, int y, int h) {
 
         height = h;
         width = 20;
 
         this.x = x;
         this.y = y;
+        this.bitmap = resource;
 
         dx = GameView.moveSpeed;
-        image = Bitmap.createBitmap(resource, 0, 0, width, height);
+        bitmap = Bitmap.createBitmap(resource, 0, 0, width, height);
     }
 
-    public void update(){
+    /**
+     * Function to update border by vector
+     */
+    public void update() {
 
         x += dx;
     }
 
-    public void draw(Canvas canvas){
+    /**
+     * Function to draw the top border
+     *
+     * @param canvas Canvas
+     */
+    public void draw(Canvas canvas) {
 
-        try{canvas.drawBitmap(image, x, y, null);}catch (Exception e){
+        try {
+            canvas.drawBitmap(bitmap, x, y, null);
+        } catch (Exception e) {
             //catch exceptions
         }
     }
