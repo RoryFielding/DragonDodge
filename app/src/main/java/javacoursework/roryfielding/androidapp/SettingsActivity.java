@@ -28,6 +28,8 @@ public class SettingsActivity extends Activity {
         //Set fullscreen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        GameView.progressDenominator = 20;
+
         setContentView(new GameView(this));
             }
 }

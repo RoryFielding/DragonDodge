@@ -9,7 +9,11 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import com.google.android.gms.ads.MobileAds;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 
 public class TheGame extends Activity {
 
@@ -20,6 +24,8 @@ public class TheGame extends Activity {
      *
      * @param savedInstanceState Bundle
      */
+
+    private InterstitialAd mInterstitialAd;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,10 +36,23 @@ public class TheGame extends Activity {
         //Set fullscreen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        // initialize the AdMob app
-        MobileAds.initialize(this, getString(R.string.app_id));
         //set initial view to the menu
         setContentView(R.layout.activity_the_game);
+
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                super.onAdClosed();
+                finish();
+            }
+        });
 
         Button startMeUp = (Button) findViewById(R.id.startMeUp);
         startMeUp.setOnClickListener(new View.OnClickListener() {
@@ -44,31 +63,12 @@ public class TheGame extends Activity {
             }
         });
 
-        Button stopMe = (Button) findViewById(R.id.stopMe);
-        stopMe.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-                System.exit(1);
-                onDestroy();
-            }
-        });
-
         Button highscore = (Button) findViewById(R.id.highscore);
         highscore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
                 launchHighscores();
-            }
-        });
-
-        Button settings = (Button) findViewById(R.id.setMeUp);
-        settings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-                launchModeChanger();
             }
         });
 
@@ -126,5 +126,20 @@ public class TheGame extends Activity {
     public void onPause() {
         super.onPause();
         finish();
+    }
+
+    /**
+     * Function to show big ad
+     */
+    public void showInterstitial(){
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        } else {
+            finish();
+        }
+    }
+    @Override
+    public void onBackPressed(){
+        showInterstitial();
     }
 }
