@@ -25,7 +25,6 @@ public class HighscoreActivity extends Activity {
     public int highscore2;
     public int highscore3;
 
-
     /**
      * Override onCreate to set the layout to the highscore layout
      * Get highscores from shared preferences and display to user

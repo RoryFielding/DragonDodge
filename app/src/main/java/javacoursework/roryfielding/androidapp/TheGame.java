@@ -2,7 +2,6 @@ package javacoursework.roryfielding.androidapp;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,10 +9,9 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import com.google.android.gms.ads.MobileAds;
 
 public class TheGame extends Activity {
-
-    MediaPlayer mediaPlayer;
 
     /**
      * Override onCreate function to set layout to menu on start up
@@ -32,11 +30,8 @@ public class TheGame extends Activity {
         //Set fullscreen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        //Start some music
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.eightbitafricatoto);
-        mediaPlayer.setLooping(true);
-        mediaPlayer.start();
-
+        // initialize the AdMob app
+        MobileAds.initialize(this, getString(R.string.app_id));
         //set initial view to the menu
         setContentView(R.layout.activity_the_game);
 
@@ -130,7 +125,6 @@ public class TheGame extends Activity {
     @Override
     public void onPause() {
         super.onPause();
-        mediaPlayer.release();
         finish();
     }
 }
