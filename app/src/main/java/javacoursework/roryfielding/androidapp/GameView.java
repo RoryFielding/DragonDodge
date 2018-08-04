@@ -109,19 +109,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
     }
-/*
-    public void secondaryThreadCalls(){
-        //set up missile timer and arrays
-        missiles = new ArrayList<Missile>();
-        topBorders = new ArrayList<TopBorder>();
-        bottomBorders = new ArrayList<BottomBorder>();
-        missileStartTime = System.nanoTime();
-
-        secondThread = new SecondaryThread(getHolder(), this);
-        secondThread.setRunning(true);
-        secondThread.start();
-    }
-    */
 
     /**
      * Override surfaceCreated, set up arraylists, background and player
