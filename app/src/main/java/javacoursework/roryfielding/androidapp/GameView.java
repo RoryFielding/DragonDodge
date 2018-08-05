@@ -10,7 +10,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.media.MediaPlayer;
 import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -49,7 +48,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private boolean reset;
     private boolean disappear;
     private boolean started;
-    private MediaPlayer explosionsound;
 
     /**
      * Constructor for the gameview
@@ -277,8 +275,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 disappear = true;
                 explosion = new Explosion(BitmapFactory.decodeResource(getResources(), R.drawable.explosion),
                         player.getX(), player.getY() - 30, 100, 100, 25); //draw explosion slightly above player
-                explosionsound = MediaPlayer.create(getContext(), R.raw.explosion);
-                explosionsound.start();
             }
             explosion.update();
             ;
