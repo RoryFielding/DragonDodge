@@ -56,7 +56,7 @@ public class HighscoreActivity extends Activity {
         mAdView.loadAd(adRequest);
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId("ca-app-pub-8889979893131718/1039543685");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
@@ -65,8 +65,6 @@ public class HighscoreActivity extends Activity {
                 finish();
             }
         });
-
-        // test ad unit id ca-app-pub-3940256099942544/1033173712
 
         goBackBtn = (Button) findViewById(R.id.settingsBackButton);
         goBackBtn.setOnClickListener(new View.OnClickListener() {
